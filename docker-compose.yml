@@ -1,0 +1,23 @@
+version: '3'
+
+services:
+  app:
+    container_name: authentication_app
+    build:
+      context: .
+      dockerfile: ./docker/server.Dockerfile
+    depends_on:
+      - postgres
+    volumes:
+      - ./:/usr/src/app/
+      - /usr/src/app/node_modules
+    ports:
+      - '3001:3001'
+
+  postgres:
+    container_name: database_authentication
+    build:
+      context: .
+      dockerfile: ./docker/database.Dockerfile
+    ports:
+      - '5432:5432'
