@@ -1,6 +1,7 @@
 const express = require('express')
 const { checkSchema } = require('express-validator')
 const routes = express.Router()
+const jwt = require('jsonwebtoken')
 
 const db = require('./db/db')
 const schemas = require('./db/schemas')
@@ -23,11 +24,30 @@ JSON format:
 */
 
 routes.get('/product', db.getAll)
-routes.get('/product/:id', db.getById)
+routes.get('/product/:id', db.verifyToken, (req, res) => {
+  jwt.verify(req.token, 'secretKey', (_err, authData) => {
+    if (_err) {
+      res.sendStatus(403)
+    } else {
+      res.json({ message: 'DEU BOM', authData })
+    }
+  })
+})
 routes.post('/product/', checkSchema(schemas.productSchema), db.insert)
 routes.put('/product/:id', checkSchema(schemas.productSchemaPut), db.update)
 routes.delete('/product/:id', db.remove)
 
+routes.post('/api/login', (req, res) => {
+  const user = {
+    username: 'teste',
+    password: 'teste'
+  }
+  jwt.sign({ user }, 'secretKey', { expiresIn: '365 days' }, (_err, token) => {
+    res.json({
+      token
+    })
+  })
+})
 /*
 ITEM ENDPOINTS
 

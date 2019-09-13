@@ -12,5 +12,6 @@ const logMiddleware = function(req, res, next) {
 server.use(express.json())
 server.use(logMiddleware)
 server.use(routes)
+server.set('Secret', 'teste')
 
-server.listen(3000)
+server.listen(3001)

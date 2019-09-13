@@ -1,14 +1,20 @@
-CREATE TABLE PRODUCT (
-	id serial PRIMARY KEY,
-	name varchar(200),
-	image varchar(100),
-	price float(2)
+CREATE TABLE ADMINISTRATOR (
+	cpf VARCHAR(11) PRIMARY KEY,
+	password VARCHAR(30),
+	name VARCHAR(200),
+	phoneNumber VARCHAR(11) UNIQUE,
+	birthday DATE,
+	email VARCHAR(254) UNIQUE,
+	image VARCHAR(100) --temporariamente
 );
 
-CREATE TABLE ITEM (
-	rfid integer PRIMARY KEY,
-	expirationDate DATE,
-	idProduct integer,
-
-	CONSTRAINT ITEM_PRODUCT_FK FOREIGN KEY (idProduct) REFERENCES PRODUCT (id) ON DELETE CASCADE ON UPDATE CASCADE
+CREATE TABLE CLIENT (
+	idClient SERIAL PRIMARY KEY,
+	username VARCHAR(50) UNIQUE,
+	password VARCHAR(30),
+	name VARCHAR(200),
+	phoneNumber VARCHAR(11),
+	birthday DATE,
+	email VARCHAR(254) UNIQUE,
+	cpf CHAR(11) UNIQUE
 );
