@@ -23,19 +23,22 @@ JSON format:
 }
 */
 
-routes.get('/product', db.getAll)
-routes.get('/product/:id', db.verifyToken, (req, res) => {
-  jwt.verify(req.token, 'secretKey', (_err, authData) => {
-    if (_err) {
-      res.sendStatus(403)
-    } else {
-      res.json({ message: 'DEU BOM', authData })
-    }
-  })
-})
-routes.post('/product/', checkSchema(schemas.productSchema), db.insert)
-routes.put('/product/:id', checkSchema(schemas.productSchemaPut), db.update)
-routes.delete('/product/:id', db.remove)
+routes.get('/product', db.verifyToken, db.getAll)
+routes.get('/product/:id', db.verifyToken, db.getById)
+
+routes.post(
+  '/product/',
+  db.verifyToken,
+  checkSchema(schemas.productSchema),
+  db.insert
+)
+routes.put(
+  '/product/:id',
+  db.verifyToken,
+  checkSchema(schemas.productSchemaPut),
+  db.update
+)
+routes.delete('/product/:id', db.verifyToken, db.remove)
 
 routes.post('/api/login', (req, res) => {
   const user = {
@@ -59,10 +62,20 @@ JSON format:
 }
 */
 
-routes.get('/item', db.getAll)
-routes.get('/item/:id', db.getById)
-routes.post('/item/', checkSchema(schemas.itemSchema), db.insert)
-routes.put('/item/:id', checkSchema(schemas.itemSchemaPut), db.updateItem)
-routes.delete('/item/:id', db.removeItem)
+routes.get('/item', db.verifyToken, db.getAll)
+routes.get('/item/:id', db.verifyToken, db.getById)
+routes.post(
+  '/item/',
+  db.verifyToken,
+  checkSchema(schemas.itemSchema),
+  db.insert
+)
+routes.put(
+  '/item/:id',
+  db.verifyToken,
+  checkSchema(schemas.itemSchemaPut),
+  db.update
+)
+routes.delete('/item/:id', db.verifyToken, db.remove)
 
 module.exports = routes

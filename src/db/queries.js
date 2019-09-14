@@ -2,7 +2,6 @@ const SELECT_ALL = tableName => {
   console.log('tablename = ', tableName)
   return 'SELECT * FROM ' + tableName + ';'
 }
-
 const UPDATE = (tableName, json, idField, id) => {
   // console.log(tableName +  column + id)
   const attributes = createUpdateString(json)
