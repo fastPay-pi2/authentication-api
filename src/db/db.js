@@ -1,13 +1,15 @@
 const Pool = require('pg').Pool
 const queries = require('./queries')
-const { validationResult } = require('express-validator')
 const jwt = require('jsonwebtoken')
+const { validationResult } = require('express-validator')
+require('dotenv/config')
+
 const pool = new Pool({
-  user: 'user',
-  host: 'database_authentication',
-  database: 'db',
-  password: 'pass',
-  port: 5432
+  user: process.env.POSTGRES_USER,
+  host: process.env.POSTGRES_HOST,
+  database: process.env.POSTGRES_DB,
+  password: process.env.POSTGRES_PASSWORD,
+  port: process.env.POSTGRES_PORT
 })
 
 function poolQuery(query, response, tableName, msg) {
@@ -25,7 +27,7 @@ function poolQuery(query, response, tableName, msg) {
 
 const getAll = (request, response) => {
   const tableName = request.path.replace(/\//g, '')
-  jwt.verify(request.token, 'secretKey', (_err, authData) => {
+  jwt.verify(request.token, process.env.SECRET_KEY, (_err, authData) => {
     if (_err) {
       response.sendStatus(403)
     } else {
@@ -37,15 +39,27 @@ const getAll = (request, response) => {
 const getById = (request, response) => {
   const requestUrl = request.path.split('/')
   const tableName = requestUrl[requestUrl.length - 2]
-  jwt.verify(request.token, 'secretKey', (_err, authData) => {
+  jwt.verify(request.token, process.env.SECRET_KEY, (_err, authData) => {
     if (_err) {
       response.sendStatus(403)
     } else {
-      poolQuery(
-        queries.SELECT_ONE(tableName, request.params.id),
-        response,
-        tableName
-      )
+      try {
+        if (tableName === 'administrator') {
+          poolQuery(
+            queries.SELECT_ONE(tableName, request.params.cpf),
+            response,
+            tableName
+          )
+        } else {
+          poolQuery(
+            queries.SELECT_ONE(tableName, request.params.id),
+            response,
+            tableName
+          )
+        }
+      } catch (error) {
+        response.status(400).json({ error: error.message })
+      }
     }
   })
 }
@@ -57,16 +71,21 @@ const insert = (request, response) => {
   if (errors.length > 0) {
     return response.status(422).json({ errors: errors })
   }
-  jwt.verify(request.token, 'secretKey', (_err, authData) => {
+
+  jwt.verify(request.token, process.env.SECRET_KEY, (_err, authData) => {
     if (_err) {
       response.sendStatus(403)
     } else {
-      poolQuery(
-        queries.INSERT(tableName, request.body),
-        response,
-        tableName,
-        ' successfully added'
-      )
+      try {
+        poolQuery(
+          queries.INSERT(tableName, request.body),
+          response,
+          tableName,
+          ' successfully added'
+        )
+      } catch (error) {
+        response.status(400).json({ error: error.message })
+      }
     }
   })
 }
@@ -74,24 +93,37 @@ const insert = (request, response) => {
 const update = (request, response) => {
   const requestUrl = request.path.split('/')
   const tableName = requestUrl[requestUrl.length - 2]
-  jwt.verify(request.token, 'secretKey', (_err, authData) => {
+  jwt.verify(request.token, process.env.SECRET_KEY, (_err, authData) => {
     if (_err) {
       response.sendStatus(403)
     } else {
-      if (tableName === 'product') {
-        poolQuery(
-          queries.UPDATE(tableName, request.body, 'id', request.params.id),
-          response,
-          tableName,
-          ' successfully updated'
-        )
-      } else {
-        poolQuery(
-          queries.UPDATE(tableName, request.body, 'rfid', request.params.id),
-          response,
-          tableName,
-          ' successfully updated'
-        )
+      try {
+        if (tableName === 'administrator') {
+          console.log('AHAHAHAHAHAH')
+          console.log(
+            queries.UPDATE(tableName, request.body, 'cpf', request.params.cpf)
+          )
+          poolQuery(
+            queries.UPDATE(tableName, request.body, 'cpf', request.params.cpf),
+            response,
+            tableName,
+            ' successfully updated'
+          )
+        } else {
+          poolQuery(
+            queries.UPDATE(
+              tableName,
+              request.body,
+              'idClient',
+              request.params.id
+            ),
+            response,
+            tableName,
+            ' successfully updated'
+          )
+        }
+      } catch (error) {
+        response.status(400).json({ error: error.message })
       }
     }
   })
@@ -100,21 +132,22 @@ const update = (request, response) => {
 const remove = (request, response) => {
   const requestUrl = request.path.split('/')
   const tableName = requestUrl[requestUrl.length - 2]
-  jwt.verify(request.token, 'secretKey', (_err, authData) => {
+  jwt.verify(request.token, process.env.SECRET_KEY, (_err, authData) => {
     if (_err) {
       response.sendStatus(403)
     } else {
-      if (tableName === 'product') {
+      if (tableName === 'administrator') {
+        console.log('DELETANDO')
+        console.log(queries.REMOVE(tableName, request.params.cpf, 'cpf'))
         poolQuery(
-          queries.REMOVE(tableName, 'id', request.params.id),
+          queries.REMOVE(tableName, request.params.cpf, 'cpf'),
           response,
           tableName,
           ' successfully removed'
         )
       } else {
-        // tableName = 'item'
         poolQuery(
-          queries.REMOVE(tableName, 'rfid', request.params.id),
+          queries.REMOVE(tableName, request.params.id, 'idClient'),
           response,
           tableName,
           ' successfully removed'
@@ -139,11 +172,62 @@ function verifyToken(req, res, next) {
   }
 }
 
+function signJwt(results, response, tableName) {
+  if (tableName === 'administrator') {
+    jwt.sign(
+      { name: results.rows.name, password: results.rows.password },
+      process.env.SECRET_KEY,
+      { expiresIn: '365 days' },
+      (_err, token) => {
+        response.json({
+          token
+        })
+      }
+    )
+  } else if (tableName === 'client') {
+    jwt.sign(
+      {
+        username: results.rows.username,
+        password: results.rows.password
+      },
+      process.env.SECRET_KEY,
+      { expiresIn: '365 days' },
+      (_err, token) => {
+        response.json({
+          token
+        })
+      }
+    )
+  }
+}
+
+const verifyUser = (request, response, next) => {
+  const requestUrl = request.path.split('/')
+  const tableName = requestUrl[requestUrl.length - 2]
+  pool.query(
+    queries.isRegistered(tableName, request.body),
+    (error, results) => {
+      if (error) {
+        response.status(400).json({ message: error.message })
+      }
+      if (results.rows.length === 0) {
+        // client/administrator not found
+        response
+          .status(400)
+          .json({ message: tableName.toUpperCase() + ' not found' })
+      } else {
+        signJwt(results, response, tableName)
+      }
+    }
+  )
+}
+
 module.exports = {
   getAll,
   getById,
   insert,
   update,
   remove,
-  verifyToken
+  verifyToken,
+  verifyUser
 }

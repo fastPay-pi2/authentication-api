@@ -2,6 +2,7 @@ const express = require('express')
 const { checkSchema } = require('express-validator')
 const routes = express.Router()
 const jwt = require('jsonwebtoken')
+require('dotenv/config')
 
 const db = require('./db/db')
 const schemas = require('./db/schemas')
@@ -23,59 +24,74 @@ JSON format:
 }
 */
 
-routes.get('/product', db.verifyToken, db.getAll)
-routes.get('/product/:id', db.verifyToken, db.getById)
-
+routes.get('/client/:id', db.verifyToken, db.getById)
 routes.post(
-  '/product/',
+  '/client/',
   db.verifyToken,
-  checkSchema(schemas.productSchema),
+  // checkSchema(schemas.productSchema),
   db.insert
 )
 routes.put(
-  '/product/:id',
+  '/client/:id',
   db.verifyToken,
-  checkSchema(schemas.productSchemaPut),
+  // checkSchema(schemas.productSchemaPut),
   db.update
 )
-routes.delete('/product/:id', db.verifyToken, db.remove)
+routes.delete('/client/:id', db.verifyToken, db.remove)
 
-routes.post('/api/login', (req, res) => {
-  const user = {
-    username: 'teste',
-    password: 'teste'
-  }
-  jwt.sign({ user }, 'secretKey', { expiresIn: '365 days' }, (_err, token) => {
-    res.json({
-      token
-    })
-  })
-})
 /*
-ITEM ENDPOINTS
+ADMIN ENDPOINTS
 
 JSON format:
 {
-  "rfid": "1",
-  "expirationDate": "2019-12-26",
-  "idProduct": 1
+  "cpf": "111111111",
+  "password": "pass",
+  "name": "name 1",
+  "phoneNumber": "123",
+  "birthday": "2018-11-13",
+  "email": "email@email.com",
+  "image": "asaas"
 }
+
 */
 
-routes.get('/item', db.verifyToken, db.getAll)
-routes.get('/item/:id', db.verifyToken, db.getById)
+routes.get('/administrator/:cpf', db.verifyToken, db.getById)
 routes.post(
-  '/item/',
+  '/administrator/',
+  checkSchema(schemas.administratorSchema),
   db.verifyToken,
-  checkSchema(schemas.itemSchema),
   db.insert
 )
 routes.put(
-  '/item/:id',
+  '/administrator/:cpf',
   db.verifyToken,
-  checkSchema(schemas.itemSchemaPut),
+  // checkSchema(schemas.administratorSchemaPut),
   db.update
 )
-routes.delete('/item/:id', db.verifyToken, db.remove)
+routes.delete('/administrator/:cpf', db.verifyToken, db.remove)
+
+// AUTHENTICATION ENDPOINTS
+
+routes.get('/validate/administrator', db.verifyToken, (request, response) => {
+  jwt.verify(request.token, process.env.SECRET_KEY, (_err, authData) => {
+    if (_err) {
+      response.sendStatus(403)
+    } else {
+      response.json({ message: 'You have signed up successfully' })
+    }
+  })
+})
+routes.post('/administrator/login/', db.verifyUser)
+
+routes.post('/client/login/', db.verifyUser)
+routes.get('/validate/client', db.verifyToken, (request, response) => {
+  jwt.verify(request.token, process.env.SECRET_KEY, (_err, authData) => {
+    if (_err) {
+      response.sendStatus(403)
+    } else {
+      response.json({ message: 'You have signed up successfully' })
+    }
+  })
+})
 
 module.exports = routes

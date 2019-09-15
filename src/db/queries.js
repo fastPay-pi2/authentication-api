@@ -1,32 +1,19 @@
 const SELECT_ALL = tableName => {
-  console.log('tablename = ', tableName)
   return 'SELECT * FROM ' + tableName + ';'
 }
 const UPDATE = (tableName, json, idField, id) => {
-  // console.log(tableName +  column + id)
   const attributes = createUpdateString(json)
-  return (
-    'UPDATE ' +
-    tableName +
-    ' SET ' +
-    attributes +
-    ' WHERE ' +
-    idField +
-    ' = ' +
-    id +
-    ';'
-  )
+  return `UPDATE ${tableName} SET ${attributes} WHERE ${idField} = '${id}';`
 }
 
 const REMOVE = (tableName, id, idField) => {
-  // console.log(tableName +  column + id)
-  return 'DELETE FROM ' + tableName + ' WHERE ' + idField + ' = ' + id + ';'
+  return `DELETE FROM ${tableName} WHERE ${idField} = '${id}' ;`
 }
 
 const SELECT_ONE = (tableName, id) => {
-  let param = 'id'
-  if (tableName === 'item') param = 'rfid'
-  return 'SELECT * FROM ' + tableName + ' WHERE ' + param + ' = ' + id + ';'
+  let param = 'idClient'
+  if (tableName === 'administrator') param = 'cpf'
+  return `SELECT * FROM ${tableName} WHERE ${param} = '${id}' ;`
 }
 
 const INSERT = (tableName, json) => {
@@ -34,13 +21,7 @@ const INSERT = (tableName, json) => {
   attributes = '(' + attributes + ')'
   let values = Object.values(json)
   values = createString(values)
-
-  // console.log(attributes)
-  // console.log(values)
-
-  return (
-    'INSERT INTO ' + tableName + ' ' + attributes + ' VALUES ' + values + ';'
-  )
+  return `INSERT INTO ${tableName} ${attributes} VALUES ${values};`
 }
 
 const createUpdateString = json => {
@@ -80,10 +61,19 @@ const isDate = str => {
   return str.search('-') > 0
 }
 
+const isRegistered = (tableName, json) => {
+  if (tableName === 'administrator') {
+    return `SELECT cpf from ${tableName} WHERE name='${json.name}' AND password='${json.password}';`
+  } else if (tableName === 'client') {
+    return `SELECT idClient from ${tableName} WHERE username='${json.username}' AND password='${json.password}';`
+  }
+}
+
 module.exports = {
   SELECT_ALL,
   SELECT_ONE,
   INSERT,
   UPDATE,
-  REMOVE
+  REMOVE,
+  isRegistered
 }

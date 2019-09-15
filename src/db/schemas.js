@@ -1,15 +1,31 @@
-const productSchema = {
+const administratorSchema = {
+  cpf: {
+    isString: true,
+    errorMessage: 'invalid cpf'
+  },
+  password: {
+    isString: true,
+    errorMessage: 'invalid password'
+  },
   name: {
     isString: true,
     errorMessage: 'invalid name'
   },
+  phoneNumber: {
+    isString: true,
+    errorMessage: 'invalid phoneNumber'
+  },
+  birthday: {
+    isString: true,
+    errorMessage: 'invalid birthday'
+  },
+  email: {
+    isString: true,
+    errorMessage: 'invalid email'
+  },
   image: {
     isString: true,
     errorMessage: 'invalid image'
-  },
-  price: {
-    isFloat: true,
-    errorMessage: 'invalid price'
   }
 }
 
@@ -64,7 +80,7 @@ const itemSchemaPut = {
 }
 
 module.exports = {
-  productSchema,
+  administratorSchema,
   itemSchema,
   productSchemaPut,
   itemSchemaPut

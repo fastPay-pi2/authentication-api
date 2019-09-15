@@ -20,4 +20,4 @@ services:
       context: .
       dockerfile: ./docker/database.Dockerfile
     ports:
-      - '5432:5432'
+      - '5433:5432'
