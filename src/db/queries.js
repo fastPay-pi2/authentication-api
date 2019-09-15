@@ -62,10 +62,11 @@ const isDate = str => {
 }
 
 const isRegistered = (tableName, json) => {
+  console.log('tableName = ', tableName)
   if (tableName === 'administrator') {
     return `SELECT cpf from ${tableName} WHERE name='${json.name}' AND password='${json.password}';`
   } else if (tableName === 'client') {
-    return `SELECT idClient from ${tableName} WHERE username='${json.username}' AND password='${json.password}';`
+    return `SELECT idClient, username, password from ${tableName} WHERE username='${json.username}' AND password='${json.password}';`
   }
 }
 

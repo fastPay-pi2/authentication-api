@@ -71,23 +71,22 @@ const insert = (request, response) => {
   if (errors.length > 0) {
     return response.status(422).json({ errors: errors })
   }
-
-  jwt.verify(request.token, process.env.SECRET_KEY, (_err, authData) => {
-    if (_err) {
-      response.sendStatus(403)
-    } else {
-      try {
-        poolQuery(
-          queries.INSERT(tableName, request.body),
-          response,
-          tableName,
-          ' successfully added'
-        )
-      } catch (error) {
-        response.status(400).json({ error: error.message })
-      }
-    }
-  })
+  try {
+    poolQuery(
+      queries.INSERT(tableName, request.body),
+      response,
+      tableName,
+      ' successfully added'
+    )
+  } catch (error) {
+    response.status(400).json({ error: error.message })
+  }
+  // jwt.verify(request.token, process.env.SECRET_KEY, (_err, authData) => {
+  //   if (_err) {
+  //     response.sendStatus(403)
+  //   } else {
+  //   }
+  // })
 }
 
 const update = (request, response) => {
@@ -175,7 +174,7 @@ function verifyToken(req, res, next) {
 function signJwt(results, response, tableName) {
   if (tableName === 'administrator') {
     jwt.sign(
-      { name: results.rows.name, password: results.rows.password },
+      { name: results.name, password: results.password },
       process.env.SECRET_KEY,
       { expiresIn: '365 days' },
       (_err, token) => {
@@ -185,10 +184,13 @@ function signJwt(results, response, tableName) {
       }
     )
   } else if (tableName === 'client') {
+    console.log('username = ', results.username)
+    console.log('id = ', results.idclient)
     jwt.sign(
       {
-        username: results.rows.username,
-        password: results.rows.password
+        id: results.idclient,
+        username: results.username,
+        password: results.password
       },
       process.env.SECRET_KEY,
       { expiresIn: '365 days' },
@@ -203,7 +205,9 @@ function signJwt(results, response, tableName) {
 
 const verifyUser = (request, response, next) => {
   const requestUrl = request.path.split('/')
-  const tableName = requestUrl[requestUrl.length - 2]
+  requestUrl.shift()
+  const tableName = requestUrl[0]
+  // const tableName = requestUrl[requestUrl.length - 2]
   pool.query(
     queries.isRegistered(tableName, request.body),
     (error, results) => {
@@ -216,7 +220,8 @@ const verifyUser = (request, response, next) => {
           .status(400)
           .json({ message: tableName.toUpperCase() + ' not found' })
       } else {
-        signJwt(results, response, tableName)
+        console.log('results rows = ', results.rows)
+        signJwt(results.rows[0], response, tableName)
       }
     }
   )

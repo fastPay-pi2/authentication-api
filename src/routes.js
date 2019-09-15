@@ -27,7 +27,7 @@ JSON format:
 routes.get('/client/:id', db.verifyToken, db.getById)
 routes.post(
   '/client/',
-  db.verifyToken,
+  // db.verifyToken,
   // checkSchema(schemas.productSchema),
   db.insert
 )
@@ -89,6 +89,7 @@ routes.get('/validate/client', db.verifyToken, (request, response) => {
     if (_err) {
       response.sendStatus(403)
     } else {
+      console.log('authData = ', authData)
       response.json({ message: 'You have signed up successfully' })
     }
   })
