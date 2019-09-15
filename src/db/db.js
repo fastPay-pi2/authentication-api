@@ -165,6 +165,7 @@ function verifyToken(req, res, next) {
     const bearer = bearerHeader.split(' ')
     const bearerToken = bearer[1]
     req.token = bearerToken
+    console.log('req.token = ', req.token)
     next()
   } else {
     res.sendStatus(403)
@@ -203,7 +204,23 @@ function signJwt(results, response, tableName) {
   }
 }
 
-const verifyUser = (request, response, next) => {
+const validateToken = (tableName, decodedToken) => {
+  pool.query(
+    queries.isRegistered(tableName, decodedToken),
+    (error, results) => {
+      if (error) {
+        response.status(400).json({ message: error.message })
+      }
+
+      if (results.rows.length > 0)
+        return true
+      else
+        return false
+    }
+  )
+}
+
+const authenticateUser = (request, response, next) => {
   const requestUrl = request.path.split('/')
   requestUrl.shift()
   const tableName = requestUrl[0]
@@ -234,5 +251,6 @@ module.exports = {
   update,
   remove,
   verifyToken,
-  verifyUser
+  authenticateUser,
+  validateToken
 }

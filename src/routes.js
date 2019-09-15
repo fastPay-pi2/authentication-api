@@ -81,16 +81,20 @@ routes.get('/validate/administrator', db.verifyToken, (request, response) => {
     }
   })
 })
-routes.post('/administrator/login/', db.verifyUser)
+routes.post('/administrator/login/', db.authenticateUser)
 
-routes.post('/client/login/', db.verifyUser)
+routes.post('/client/login/', db.authenticateUser)
 routes.get('/validate/client', db.verifyToken, (request, response) => {
-  jwt.verify(request.token, process.env.SECRET_KEY, (_err, authData) => {
+  jwt.verify(request.token, process.env.SECRET_KEY, (_err, token) => {
     if (_err) {
-      response.sendStatus(403)
+      return response.json({ message: _err})
     } else {
-      console.log('authData = ', authData)
-      response.json({ message: 'You have signed up successfully' })
+      tokenIsValid = db.validateToken('client', token)
+      if (token){
+        return response.json({ message: 'Access authorized'})
+      } else {
+        return response.json({ message: 'Access denied'})
+      }
     }
   })
 })
