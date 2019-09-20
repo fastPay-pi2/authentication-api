@@ -1,11 +1,11 @@
 const express = require('express')
 const { checkSchema } = require('express-validator')
 const routes = express.Router()
-const jwt = require('jsonwebtoken')
 require('dotenv/config')
 
 const db = require('./db/db')
 const schemas = require('./db/schemas')
+const authentication = require('./db/authentication')
 
 routes.get('/', (req, res) => {
   return res.json({
@@ -24,20 +24,30 @@ JSON format:
 }
 */
 
-routes.get('/client/:id', db.verifyToken, db.getById)
+routes.get(
+  '/client/:id',
+  authentication.setRequestToken,
+  authentication.userIsRegistered,
+  db.getById
+)
 routes.post(
   '/client/',
-  // db.verifyToken,
   // checkSchema(schemas.productSchema),
   db.insert
 )
 routes.put(
   '/client/:id',
-  db.verifyToken,
+  authentication.setRequestToken,
+  authentication.userIsRegistered,
   // checkSchema(schemas.productSchemaPut),
   db.update
 )
-routes.delete('/client/:id', db.verifyToken, db.remove)
+routes.delete(
+  '/client/:id',
+  authentication.setRequestToken,
+  authentication.userIsRegistered,
+  db.remove
+)
 
 /*
 ADMIN ENDPOINTS
@@ -55,48 +65,55 @@ JSON format:
 
 */
 
-routes.get('/administrator/:cpf', db.verifyToken, db.getById)
+routes.get(
+  '/administrator/:cpf',
+  authentication.setRequestToken,
+  authentication.userIsRegistered,
+  db.getById
+)
 routes.post(
   '/administrator/',
   checkSchema(schemas.administratorSchema),
-  db.verifyToken,
+  authentication.setRequestToken,
+  authentication.userIsRegistered,
   db.insert
 )
 routes.put(
   '/administrator/:cpf',
-  db.verifyToken,
+  authentication.setRequestToken,
+  authentication.userIsRegistered,
   // checkSchema(schemas.administratorSchemaPut),
   db.update
 )
-routes.delete('/administrator/:cpf', db.verifyToken, db.remove)
+routes.delete(
+  '/administrator/:cpf',
+  authentication.setRequestToken,
+  authentication.userIsRegistered,
+  db.remove
+)
 
 // AUTHENTICATION ENDPOINTS
 
-routes.get('/validate/administrator', db.verifyToken, (request, response) => {
-  jwt.verify(request.token, process.env.SECRET_KEY, (_err, authData) => {
-    if (_err) {
-      response.sendStatus(403)
-    } else {
-      response.json({ message: 'You have signed up successfully' })
-    }
-  })
-})
-routes.post('/administrator/login/', db.authenticateUser)
+// routes.get(
+//   '/validate/administrator',
+//   authentication.setRequestToken,
+//   (request, response, next) => {
+//     authentication.verifyToken(request, response, next)
+//   }
+// )
 
-routes.post('/client/login/', db.authenticateUser)
-routes.get('/validate/client', db.verifyToken, (request, response) => {
-  jwt.verify(request.token, process.env.SECRET_KEY, (_err, token) => {
-    if (_err) {
-      return response.json({ message: _err})
-    } else {
-      tokenIsValid = db.validateToken('client', token)
-      if (token){
-        return response.json({ message: 'Access authorized'})
-      } else {
-        return response.json({ message: 'Access denied'})
-      }
-    }
-  })
-})
+routes.post(
+  '/administrator/login/',
+  db.authenticateUser,
+  authentication.userIsRegistered
+)
+
+routes.post('/client/login/', db.authenticateUser, authentication.validateUser)
+
+// routes.get(
+//   '/validate/client',
+//   authentication.setRequestToken,
+//   authentication.userIsRegistered
+// )
 
 module.exports = routes

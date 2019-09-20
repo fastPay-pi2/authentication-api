@@ -172,85 +172,10 @@ function verifyToken(req, res, next) {
   }
 }
 
-function signJwt(results, response, tableName) {
-  if (tableName === 'administrator') {
-    jwt.sign(
-      { name: results.name, password: results.password },
-      process.env.SECRET_KEY,
-      { expiresIn: '365 days' },
-      (_err, token) => {
-        response.json({
-          token
-        })
-      }
-    )
-  } else if (tableName === 'client') {
-    console.log('username = ', results.username)
-    console.log('id = ', results.idclient)
-    jwt.sign(
-      {
-        id: results.idclient,
-        username: results.username,
-        password: results.password
-      },
-      process.env.SECRET_KEY,
-      { expiresIn: '365 days' },
-      (_err, token) => {
-        response.json({
-          token
-        })
-      }
-    )
-  }
-}
-
-const validateToken = (tableName, decodedToken) => {
-  pool.query(
-    queries.isRegistered(tableName, decodedToken),
-    (error, results) => {
-      if (error) {
-        response.status(400).json({ message: error.message })
-      }
-
-      if (results.rows.length > 0)
-        return true
-      else
-        return false
-    }
-  )
-}
-
-const authenticateUser = (request, response, next) => {
-  const requestUrl = request.path.split('/')
-  requestUrl.shift()
-  const tableName = requestUrl[0]
-  // const tableName = requestUrl[requestUrl.length - 2]
-  pool.query(
-    queries.isRegistered(tableName, request.body),
-    (error, results) => {
-      if (error) {
-        response.status(400).json({ message: error.message })
-      }
-      if (results.rows.length === 0) {
-        // client/administrator not found
-        response
-          .status(400)
-          .json({ message: tableName.toUpperCase() + ' not found' })
-      } else {
-        console.log('results rows = ', results.rows)
-        signJwt(results.rows[0], response, tableName)
-      }
-    }
-  )
-}
-
 module.exports = {
   getAll,
   getById,
   insert,
   update,
-  remove,
-  verifyToken,
-  authenticateUser,
-  validateToken
+  remove
 }
