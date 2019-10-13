@@ -7,17 +7,15 @@ services:
       context: .
       dockerfile: ./docker/server.Dockerfile
     depends_on:
-      - postgres
+      - db
     volumes:
       - ./:/usr/src/app/
       - /usr/src/app/node_modules
     ports:
       - '3001:3001'
 
-  postgres:
-    container_name: database_authentication
-    build:
-      context: .
-      dockerfile: ./docker/database.Dockerfile
+  db:
+    image: mongo
+    container_name: authentication_db
     ports:
-      - '5433:5432'
+      - 27017:27017

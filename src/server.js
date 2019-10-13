@@ -1,6 +1,6 @@
 const express = require('express')
-const routes = require('./routes')
-const server = express()
+const mongoose = require('mongoose')
+const databaseConfig = require('./config/database')
 
 const logMiddleware = function(req, res, next) {
   console.log(
@@ -9,8 +9,31 @@ const logMiddleware = function(req, res, next) {
   return next()
 }
 
-server.use(express.json())
-server.use(logMiddleware)
-server.use(routes)
+class App {
+  constructor () {
+    this.express = express()
+    this.isDev = process.env.NODE_ENV !== 'production'
 
-server.listen(3001)
+    this.database()
+    this.middleware()
+    this.routes()
+  }
+
+  database () {
+    mongoose.connect(databaseConfig.uri, {
+      useCreateIndex: true,
+      useNewUrlParser: true
+    })
+  }
+
+  middleware () {
+    this.express.use(express.json())
+    this.express.use(logMiddleware)
+  }
+
+  routes () {
+    this.express.use(require('./routes'))
+  }
+}
+
+module.exports = new App().express
