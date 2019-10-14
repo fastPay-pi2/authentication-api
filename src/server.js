@@ -1,6 +1,7 @@
 const express = require('express')
 const mongoose = require('mongoose')
 const databaseConfig = require('./config/database')
+const cors = require('cors')
 
 const logMiddleware = function(req, res, next) {
   console.log(
@@ -14,6 +15,7 @@ class App {
     this.express = express()
     this.isDev = process.env.NODE_ENV !== 'production'
 
+    this.cors()
     this.database()
     this.middleware()
     this.routes()
@@ -33,6 +35,10 @@ class App {
 
   routes () {
     this.express.use(require('./routes'))
+  }
+
+  cors () {
+    this.express.use(cors())
   }
 }
 
