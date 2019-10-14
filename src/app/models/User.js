@@ -8,15 +8,31 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  username: {
+    type: String,
+    required: true
+  },
   email: {
     type: String,
     required: true,
     unique: true,
     lowercase: true
   },
+  cpf: {
+    type: String,
+    required: true,
+    unique: true
+  },
   password: {
     type: String,
     required: true
+  },
+  birthday: {
+    type: Date
+  },
+  isAdmin: {
+    type: Boolean,
+    default: false
   },
   createdAt: {
     type: Date,
