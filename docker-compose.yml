@@ -1,13 +1,13 @@
 version: '3'
 
 services:
-  app:
+  authentication_app:
     container_name: authentication_app
     build:
       context: .
       dockerfile: ./docker/server.Dockerfile
     depends_on:
-      - db
+      - authentication_db
     volumes:
       - ./:/usr/src/app/
       - /usr/src/app/node_modules
@@ -16,7 +16,7 @@ services:
     ports:
       - '3001:3001'
 
-  db:
+  authentication_db:
     image: mongo
     container_name: authentication_db
     networks:
