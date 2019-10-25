@@ -4,6 +4,7 @@ stages:
   - deploy
 
 code_style:
+  image: node:10-alpine
   stage: test
   script:
     - yarn
