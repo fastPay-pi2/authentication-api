@@ -23,7 +23,7 @@ build-app:
   - docker:dind
   variables:
     IMAGE_NAME: "app"
-    CI_REGISTRY_IMAGE: "registry.gitlab.com/fastpay-pi2/"
+    CI_REGISTRY_IMAGE: "registry.gitlab.com/fastpay-pi2/authentication-api"
   before_script:
   - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_TOKEN registry.gitlab.com
   script:
@@ -34,20 +34,3 @@ build-app:
   only:
   - master
 
-build-db:
-  image: docker:latest
-  stage: build
-  services:
-  - docker:dind
-  variables:
-    IMAGE_NAME: "db"
-    CI_REGISTRY_IMAGE: "registry.gitlab.com/fastpay-pi2/"
-  before_script:
-  - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_TOKEN registry.gitlab.com
-  script:
-  - docker build -t $CI_REGISTRY_IMAGE/$IMAGE_NAME:latest -f ./docker/database.Dockerfile .
-  - docker push $CI_REGISTRY_IMAGE/$IMAGE_NAME:latest
-  tags:
-  - docker
-  only:
-  - master

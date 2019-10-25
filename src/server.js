@@ -11,7 +11,7 @@ const logMiddleware = function(req, res, next) {
 }
 
 class App {
-  constructor () {
+  constructor() {
     this.express = express()
     this.isDev = process.env.NODE_ENV !== 'production'
 
@@ -21,7 +21,7 @@ class App {
     this.routes()
   }
 
-  database () {
+  database() {
     mongoose.connect(databaseConfig.uri, {
       useUnifiedTopology: true,
       useCreateIndex: true,
@@ -29,16 +29,16 @@ class App {
     })
   }
 
-  middleware () {
+  middleware() {
     this.express.use(express.json())
     this.express.use(logMiddleware)
   }
 
-  routes () {
+  routes() {
     this.express.use(require('./routes'))
   }
 
-  cors () {
+  cors() {
     this.express.use(cors())
   }
 }

@@ -40,7 +40,7 @@ const UserSchema = new mongoose.Schema({
   }
 })
 
-UserSchema.pre('save', async function (next) {
+UserSchema.pre('save', async function(next) {
   if (!this.isModified('password')) {
     return next()
   }
@@ -48,13 +48,13 @@ UserSchema.pre('save', async function (next) {
 })
 
 UserSchema.methods = {
-  compareHash (password) {
+  compareHash(password) {
     return bcrypt.compare(password, this.password)
   }
 }
 
 UserSchema.statics = {
-  generateToken ({ id }){
+  generateToken({ id }) {
     return jwt.sign({ id }, authConfig.secret, {
       expiresIn: authConfig.ttl
     })
