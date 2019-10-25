@@ -1,19 +1,19 @@
 const User = require('../models/User')
 
 class UserController {
-  async index (req, res) {
+  async index(req, res) {
     const users = await User.find()
 
     return res.json(users)
   }
 
-  async show (req, res) {
+  async show(req, res) {
     const user = await User.findById(req.params.id)
 
     return res.json(user)
   }
 
-  async store (req, res) {
+  async store(req, res) {
     const { email } = req.body
 
     if (await User.findOne({ email })) {
@@ -25,7 +25,7 @@ class UserController {
     return res.json(user)
   }
 
-  async update (req, res) {
+  async update(req, res) {
     const user = await User.findByIdAndUpdate(req.params.id, req.body, {
       new: true
     })
@@ -33,7 +33,7 @@ class UserController {
     return res.json(user)
   }
 
-  async destroy (req, res) {
+  async destroy(req, res) {
     await User.findByIdAndDelete(req.params.id)
 
     return res.send()

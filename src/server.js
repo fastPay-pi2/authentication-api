@@ -1,6 +1,7 @@
 const express = require('express')
 const mongoose = require('mongoose')
 const databaseConfig = require('./config/database')
+const cors = require('cors')
 
 const logMiddleware = function(req, res, next) {
   console.log(
@@ -10,29 +11,35 @@ const logMiddleware = function(req, res, next) {
 }
 
 class App {
-  constructor () {
+  constructor() {
     this.express = express()
     this.isDev = process.env.NODE_ENV !== 'production'
 
+    this.cors()
     this.database()
     this.middleware()
     this.routes()
   }
 
-  database () {
+  database() {
     mongoose.connect(databaseConfig.uri, {
+      useUnifiedTopology: true,
       useCreateIndex: true,
       useNewUrlParser: true
     })
   }
 
-  middleware () {
+  middleware() {
     this.express.use(express.json())
     this.express.use(logMiddleware)
   }
 
-  routes () {
+  routes() {
     this.express.use(require('./routes'))
+  }
+
+  cors() {
+    this.express.use(cors())
   }
 }
 

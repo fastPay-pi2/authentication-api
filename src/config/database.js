@@ -1,3 +1,3 @@
 module.exports = {
-  uri: 'mongodb://db:27017/authentication'
+  uri: 'mongodb://authentication_db:27017/authentication'
 }
