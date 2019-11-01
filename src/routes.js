@@ -29,6 +29,8 @@ routes.post('/users', controllers.UserController.store)
  */
 routes.post('/sessions', controllers.SessionController.store)
 
+routes.get('/users', controllers.UserController.index)
+
 routes.use(authMiddleware)
 
 routes.get('/check', (req, res) => res.json({ isValid: true }))
@@ -37,7 +39,6 @@ routes.get('/check', (req, res) => res.json({ isValid: true }))
  * User manage
  */
 
-routes.get('/users', controllers.UserController.index)
 routes.get('/users/:id', controllers.UserController.show)
 routes.put('/users/:id', controllers.UserController.update)
 routes.delete('/users/:id', controllers.UserController.destroy)
