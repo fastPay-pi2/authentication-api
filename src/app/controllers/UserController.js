@@ -26,11 +26,11 @@ class UserController {
   }
 
   async update(req, res) {
-    const user = await User.findByIdAndUpdate(req.params.id, req.body, {
-      new: true
-    })
+    const user = await User.findByIdAndUpdate(req.params.id, req.body)
+    
+    const newUser = await User.findById(req.params.id)
 
-    return res.json(user)
+    return res.json(newUser)
   }
 
   async destroy(req, res) {
